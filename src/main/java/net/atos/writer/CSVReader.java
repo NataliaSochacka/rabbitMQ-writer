@@ -12,32 +12,35 @@ import lombok.ToString;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
+//@NoArgsConstructor
 @ToString
 public class CSVReader {
 
-    private int columnNumber; //?
-    private String separator = ","; // z properties
+    public List<File> getFilesFromFolder(String folderName) {
 
-    private ArrayList<File> fileList;
+        List<File> fileList = null;
 
-    @Value("#{'${list.of.folders}'.split(',')}")
-    private List<String> fileStringList;
+        try  {
 
-    public void importFileList(){
+            fileList = Files.walk(Paths.get(folderName))
+                    .filter(Files::isRegularFile)
+                    .map(Path::toFile)
+                    .collect(Collectors.toList());
+        } catch (IOException e){
 
-        fileList = new ArrayList<File>();
-
-        for (String path : fileStringList) {
-
-            fileList.add(new File(path));
+            e.printStackTrace();
         }
+
+        return fileList;
     }
 
     public List<Map<?, ?>> readFromFile(File inFile) {
@@ -50,6 +53,8 @@ public class CSVReader {
             CsvMapper csvMapper = new CsvMapper();
 
             MappingIterator<Map<?, ?>> mappingIterator =  csvMapper.reader().forType(Map.class).with(csv).readValues(inFile);
+
+            //Tu po batch.size linijek
             list = mappingIterator.readAll();
 
         } catch(Exception e) {
@@ -59,18 +64,19 @@ public class CSVReader {
         return list;
     }
 
-    public String toJSON(Map<?, ?> record){
+    public String toJSON(List<Map<?, ?>> records){
 
         ObjectMapper mapper = new ObjectMapper();
-        String json = null;
+        String json = "";
 
-        try {
+        for (Map<?, ?> record : records) {
+            try {
 
-            json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(record);
-        }
-        catch (JsonProcessingException e) {
+                json += mapper.writerWithDefaultPrettyPrinter().writeValueAsString(record);
+            } catch (JsonProcessingException e) {
 
-            e.printStackTrace();
+                e.printStackTrace();
+            }
         }
 
         return json;

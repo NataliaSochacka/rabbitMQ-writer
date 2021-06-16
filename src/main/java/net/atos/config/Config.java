@@ -26,18 +26,6 @@ public class Config {
     private String ROUTING_KEY ;
 
     @Bean
-    public RabbitAdmin rabbitAdmin(Queue queue, ConnectionFactory connectionFactory) {
-        final TopicExchange exchange = new TopicExchange(EXCHANGE, true, false);
-
-        final RabbitAdmin admin = new RabbitAdmin(connectionFactory);
-        admin.declareQueue(queue);
-        admin.declareExchange(exchange);
-        admin.declareBinding(BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY));
-
-        return admin;
-    }
-
-    @Bean
     public Queue queue(){
 
         return new Queue(QUEUE, true, false, false);
