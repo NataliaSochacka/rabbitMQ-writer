@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class RabbitServer implements CommandLineRunner {
 
-    private int port;
-
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
@@ -32,7 +30,7 @@ public class RabbitServer implements CommandLineRunner {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new RabbitServerInitializer());
 
-            serverBootstrap.bind(port).sync().channel().closeFuture().sync();
+            serverBootstrap.bind(8000).sync().channel().closeFuture().sync();
         }
         finally {
 
