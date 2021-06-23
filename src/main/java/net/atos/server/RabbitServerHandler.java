@@ -6,15 +6,17 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import lombok.Data;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+@Data
 @Component
 public class RabbitServerHandler extends SimpleChannelInboundHandler<String> {
 
     private static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    private RabbitTemplate rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
     @Value("${EXCHANGE}")
     private String EXCHANGE;
@@ -32,10 +34,7 @@ public class RabbitServerHandler extends SimpleChannelInboundHandler<String> {
 
         Channel incoming = channelHandlerContext.channel();
 
-        for (Channel channel : channels) {
-
-            channel.write("Server: " + incoming.remoteAddress() + " connected");
-        }
+        System.out.println("Server: " + incoming.remoteAddress() + " added");
 
         channels.add(channelHandlerContext.channel());
     }
@@ -45,10 +44,7 @@ public class RabbitServerHandler extends SimpleChannelInboundHandler<String> {
 
         Channel incoming = channelHandlerContext.channel();
 
-        for (Channel channel : channels) {
-
-            channel.write("Server: " + incoming.remoteAddress() + " disconnected");
-        }
+        System.out.println("Server: " + incoming.remoteAddress() + " removed");
 
         channels.add(channelHandlerContext.channel());
     }
@@ -58,13 +54,7 @@ public class RabbitServerHandler extends SimpleChannelInboundHandler<String> {
 
         Channel incoming = channelHandlerContext.channel();
 
-        for (Channel channel : channels) {
-
-            if (channel != incoming) {
-
-                channel.write("Sending: " + incoming.remoteAddress() + " " + message);
-                rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, message);
-            }
-        }
+        System.out.println("Sending: " + incoming.remoteAddress() + " " + message);
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, message);
     }
 }
