@@ -1,0 +1,25 @@
+{
+  "name" : "RabbitEmbeddedBroker",
+  "defaultVirtualHost" : "default",
+  "modelVersion" : "1.0",
+  "authenticationproviders" : [ {
+    "name" : "passwordFile",
+    "path" : "${qpid.pass_file}",
+    "type" : "PlainPasswordFile",
+    "users": [
+      {
+        "name": "test",
+        "password": "test"
+      }]
+      }],
+  "ports" : [ {
+    "name" : "AMQP",
+    "port" : "${qpid.amqp_port}",
+    "authenticationProvider" : "passwordFile"
+  } ],
+  "virtualhosts" : [ {
+    "name" : "default",
+    "storePath" : "${qpid.work_dir}/derbystore/default",
+    "storeType" : "DERBY"
+  } ]
+}
